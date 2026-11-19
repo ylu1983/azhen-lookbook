@@ -37,7 +37,7 @@
       || results.getBoundingClientRect().top > window.innerHeight - 120;
     update();
     render(true);
-    if (shouldReveal) {
+    if (shouldReveal || !document.querySelector('#empty-state').hidden) {
       const top = window.scrollY + results.getBoundingClientRect().top - filterBar.offsetHeight;
       window.scrollTo({ top, behavior: 'instant' });
     }
