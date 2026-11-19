@@ -30,6 +30,7 @@ body{overflow-wrap:anywhere}
 .photo-number{line-height:1.7}
 /* A selected concern must fit its scrollport even with enlarged system text. */
 @media(max-width:700px){.filter-chip{flex:0 0 auto;max-width:calc(100% - 16px);white-space:normal;overflow-wrap:anywhere}}
+.filter-options.has-leading-fragment{-webkit-mask-image:linear-gradient(to right,transparent 14px,#000 14px);mask-image:linear-gradient(to right,transparent 14px,#000 14px)}
 @media(max-width:700px){.site-header{min-height:80px}.site-header nav .nav-link{display:none}.brand{flex-shrink:0}.related-heading,.results-line{flex-wrap:wrap}}
 /* em breakpoints also respond to the browser's preferred font size. */
 @media(max-width:20em){.outfit-grid{grid-template-columns:minmax(0,1fr)}.hero-copy,.detail-copy{min-width:0}}

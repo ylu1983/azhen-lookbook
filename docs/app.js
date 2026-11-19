@@ -8,11 +8,31 @@
   const state = { occasion: '', concern: '' };
   const filterBar = document.querySelector('.filter-bar');
 
+  function updateScrollEdge(options) {
+    const selected = options.querySelector('.is-active');
+    const previous = selected?.previousElementSibling;
+    let fragment = false;
+    if (previous) {
+      const bounds = options.getBoundingClientRect();
+      const chip = selected.getBoundingClientRect();
+      const before = previous.getBoundingClientRect();
+      const style = getComputedStyle(previous);
+      const textEnd = before.right - parseFloat(style.paddingRight) - parseFloat(style.borderRightWidth);
+      // Cover only a tiny cut-off text tail, never a readable option or the selected chip.
+      fragment = before.left < bounds.left && textEnd > bounds.left
+        && textEnd <= bounds.left + 14 && chip.left >= bounds.left + 14;
+    }
+    options.classList.toggle('has-leading-fragment', fragment);
+  }
+
   function revealSelections() {
     for (const options of document.querySelectorAll('.filter-options')) {
       const overflow = options.scrollWidth > options.clientWidth + 1;
       options.closest('.filter-row').classList.toggle('is-scrollable', overflow);
-      if (!overflow) continue;
+      if (!overflow) {
+        options.classList.remove('has-leading-fragment');
+        continue;
+      }
       const selected = options.querySelector('.is-active');
       const bounds = options.getBoundingClientRect();
       const chip = selected.getBoundingClientRect();
@@ -22,6 +42,7 @@
       } else if (chip.right > bounds.right - inset) {
         options.scrollLeft += chip.right - bounds.right + inset;
       }
+      updateScrollEdge(options);
     }
   }
 
@@ -146,6 +167,9 @@
     }
     window.addEventListener('popstate', () => { readLocation(); render(); });
     window.addEventListener('pageshow', syncFilterLayout);
+    for (const options of document.querySelectorAll('.filter-options')) {
+      options.addEventListener('scroll', () => updateScrollEdge(options), { passive: true });
+    }
     new ResizeObserver(syncFilterLayout).observe(filterBar);
   } else {
     const query = new URLSearchParams();
