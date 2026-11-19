@@ -86,10 +86,29 @@ class LookbookTests(unittest.TestCase):
 
     def test_images_are_small_enough_for_mobile(self):
         self.assertEqual(len(list((DOCS / 'assets').glob('outfit-*-small.webp'))), 27)
+        self.assertEqual(len(list((DOCS / 'assets').glob('outfit-*-medium.webp'))), 27)
         for photo in (DOCS / 'assets').glob('*-small.webp'):
             self.assertLess(photo.stat().st_size, 65_000)
+        for photo in (DOCS / 'assets').glob('*-medium.webp'):
+            self.assertLess(photo.stat().st_size, 90_000)
         for photo in (DOCS / 'assets').glob('*-large.webp'):
             self.assertLess(photo.stat().st_size, 200_000)
+
+    def test_responsive_candidates_exist_and_grid_keeps_native_lazy_loading(self):
+        for page in DOCS.rglob('*.html'):
+            images = [a for tag, a in Document(page.read_text()).tags if tag == 'img' and 'srcset' in a]
+            for attrs in images:
+                self.assertEqual((attrs['width'], attrs['height']), ('1080', '1350'))
+                candidates = [candidate.strip().split() for candidate in attrs['srcset'].split(',')]
+                self.assertEqual([width for _, width in candidates], ['480w', '640w', '1080w'])
+                for source, _ in candidates:
+                    self.assertTrue((page.parent / source).is_file(), f'{page}: {source}')
+        home = Document((DOCS / 'index.html').read_text())
+        photos = [a for tag, a in home.tags if tag == 'img' and 'srcset' in a]
+        grid = photos[2:]
+        self.assertEqual(len(grid), 27)
+        self.assertEqual([img['loading'] for img in grid], ['eager'] * 2 + ['lazy'] * 25)
+        self.assertIn('(max-width: 700px) calc((100vw - 50px) / 2)', grid[0]['sizes'])
 
 
 if __name__ == '__main__':

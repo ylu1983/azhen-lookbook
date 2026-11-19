@@ -24,7 +24,9 @@ Open `http://localhost:8000/`. Each outfit also works as a static page with Java
 - `scripts/build.py`: standard-library static generator
 - `docs/`: the complete published site, including generated outfit pages and optimized photographs
 
-Images were converted to responsive 480px/1080px WebP variants without cropping or stretching. The original photos and the full brief remain in the user's original upload, not duplicated in the public repository. The supplied logo is retained. The malformed replacement characters in outfit 23's name were corrected to `＋`; outfit copy and all concern tags are otherwise unchanged.
+Images use responsive 480px/640px/1080px WebP variants without cropping or stretching. Grid `sizes` follows the actual CSS columns, gutters, and gaps so high-density phones do not unnecessarily download full detail photos. Native lazy loading and reserved 4:5 image space keep scrolling incremental and stable. The original photos and the full brief remain in the user's original upload, not duplicated in the public repository. The supplied logo is retained. The malformed replacement characters in outfit 23's name were corrected to `＋`; outfit copy and all concern tags are otherwise unchanged.
+
+To regenerate only the intermediate 640px variants, install Pillow separately and run `python3 scripts/resize_photos.py`. This optional asset tool preserves the existing 480px and 1080px files; normal builds and CI still use only the Python standard library.
 
 To update content or styles, edit the source and run the build command. Commit the generated `docs/` changes along with the source. Photograph rights remain with their respective owners; the repository does not grant a license to reuse them.
 

@@ -12,6 +12,9 @@ SHOP = json.loads((ROOT / 'content/shop.json').read_text())
 OCCASIONS = ['日常', '通勤', '休閒', '正式', '假日']
 CONCERNS = ['手臂粗不敢穿無袖', '小腹明顯', '只敢穿黑怕亮色顯老']
 SITE = 'https://ylu1983.github.io/azhen-lookbook/'
+# Keep these slot widths aligned with the grid's breakpoints, gutters and gaps.
+# Overstating a 171.5px tile as 46vw makes a DPR 2.75 phone skip the 480px file.
+CARD_SIZES = '(max-width: 360px) calc((100vw - 38px) / 2), (max-width: 700px) calc((100vw - 50px) / 2), (max-width: 1000px) calc((100vw - 88px) / 3), (max-width: 1320px) calc((100vw - 152px) / 4), 292px'
 
 
 def esc(value):
@@ -24,7 +27,7 @@ IG = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="3" 
 
 def image(outfit, prefix='', extra='', eager=False):
     n = outfit['id']
-    return f'<img src="{prefix}assets/outfit-{n:02d}-large.webp" srcset="{prefix}assets/outfit-{n:02d}-small.webp 480w, {prefix}assets/outfit-{n:02d}-large.webp 1080w" sizes="{extra or "(max-width: 600px) 46vw, (max-width: 960px) 30vw, 290px"}" width="1080" height="1350" alt="{esc(outfit["name"])}" loading="{"eager" if eager else "lazy"}" decoding="async">'
+    return f'<img src="{prefix}assets/outfit-{n:02d}-large.webp" srcset="{prefix}assets/outfit-{n:02d}-small.webp 480w, {prefix}assets/outfit-{n:02d}-medium.webp 640w, {prefix}assets/outfit-{n:02d}-large.webp 1080w" sizes="{extra or CARD_SIZES}" width="1080" height="1350" alt="{esc(outfit["name"])}" loading="{"eager" if eager else "lazy"}" decoding="async">'
 
 
 def header(prefix='', home=False):
