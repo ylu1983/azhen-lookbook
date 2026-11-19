@@ -156,6 +156,8 @@
     for (const link of document.querySelectorAll('[data-back-link], .related-grid .outfit-link')) {
       const url = new URL(link.href);
       url.search = query.toString();
+      // Return to the results, not the tall collection introduction at large text sizes.
+      url.hash = 'outfit-grid';
       link.href = url.href;
     }
   }
