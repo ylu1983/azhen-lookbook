@@ -56,7 +56,7 @@ def card(outfit, prefix='', eager=False):
 
 def filters(group, label, options):
     buttons = ''.join(f'<button type="button" class="filter-chip{" is-active" if not value else ""}" data-filter="{group}" data-value="{value}" aria-pressed="{"false" if value else "true"}">{value or "全部"}</button>' for value in ['', *options])
-    return f'<div class="filter-row"><span class="filter-label" id="{group}-label">{label}</span><div class="filter-options" role="group" aria-labelledby="{group}-label">{buttons}</div></div>'
+    return f'<div class="filter-row"><span class="filter-label" id="{group}-label">{label}<span class="filter-hint" aria-hidden="true">左右滑動</span></span><div class="filter-options" role="group" aria-labelledby="{group}-label">{buttons}</div></div>'
 
 
 def home():
