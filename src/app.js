@@ -70,6 +70,23 @@
       container.append(button);
     }
   }
+  const copyButton = document.querySelector('.copy-inquiry');
+  if (copyButton) {
+    const message = document.querySelector('#inquiry-message');
+    const status = document.querySelector('#copy-status');
+    copyButton.hidden = false;
+    copyButton.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(message.value);
+        status.textContent = '已複製，開啟 Instagram 後貼上即可。';
+      } catch {
+        message.focus();
+        message.select();
+        message.setSelectionRange(0, message.value.length);
+        status.textContent = '請長按已選取的內容，選擇「複製」，再到 Instagram 貼上。';
+      }
+    });
+  }
 
   function readLocation() {
     const query = new URLSearchParams(location.search);
@@ -136,7 +153,7 @@
       const value = params.get(key);
       if (value) query.set(key, value);
     }
-    for (const link of document.querySelectorAll('[data-back-link]')) {
+    for (const link of document.querySelectorAll('[data-back-link], .related-grid .outfit-link')) {
       const url = new URL(link.href);
       url.search = query.toString();
       link.href = url.href;

@@ -72,6 +72,16 @@ def home():
     (OUT / 'index.html').write_text(shell('阿蓁の衣舖子｜找到妳喜歡的日常穿搭', '台北內湖，阿蓁の衣舖子相伴 19 年。27 套用心挑選的穿搭，依場合與穿搭困擾找靈感，喜歡就到 Instagram 私訊詢問。', body))
 
 
+def inquiry(outfit):
+    number = outfit['id']
+    message = f'阿蓁您好，我想詢問第 {number:02d} 套：{outfit["name"]}\n{SITE}outfits/{number:02d}/'
+    return f'''<div class="detail-action" id="inquiry"><p>喜歡這一套？先複製資訊，再到 Instagram 貼上詢問。</p>
+    <label class="inquiry-label" for="inquiry-message">這一套的詢問內容</label><textarea id="inquiry-message" class="inquiry-message" rows="4" readonly>{esc(message)}</textarea>
+    <button class="copy-inquiry" type="button" hidden>複製穿搭資訊</button><p id="copy-status" class="copy-status" role="status" aria-live="polite"></p>
+    <a class="primary-button inquiry-button" href="https://ig.me/m/azhen_2026" aria-label="私訊問價，開啟與 @azhen_2026 的 Instagram 對話">{IG}私訊問價{ARROW}</a>
+    <p class="inquiry-note">需要登入 Instagram 才能傳送訊息。<br>未開啟對話？<a href="{SHOP['instagram']}" target="_blank" rel="noopener noreferrer">開啟 @azhen_2026 個人檔案（另開分頁）</a>，再點「發送訊息」。<br>若仍無法開啟，請用右上角選單改用外部瀏覽器，或在 Instagram 搜尋 @azhen_2026。<br>資訊不會自動傳送，請貼上後再送出。</p></div>'''
+
+
 def detail(outfit):
     n = outfit['id']
     prefix = '../../'
@@ -80,7 +90,7 @@ def detail(outfit):
     tags = ''.join(f'<span>{esc(tag)}</span>' for tag in outfit['occasions'] + outfit['concerns'])
     following = [OUTFITS[(n + offset) % len(OUTFITS)] for offset in range(3)]
     guidance = arm_guidance(prefix) if '手臂粗不敢穿無袖' in outfit['concerns'] else ''
-    body = header(prefix) + f'''<main id="main"><div class="wrap"><a class="back-link" data-back-link href="../../#collection">← 回到穿搭型錄</a><section class="detail-layout" aria-labelledby="outfit-title"><div class="detail-photo">{image(outfit, prefix, '(max-width: 700px) 100vw, 55vw', eager=True)}</div><div class="detail-copy"><p class="eyebrow">阿蓁の穿搭提案 <span class="outfit-no">{n:02d} / 27</span></p><h1 id="outfit-title">{esc(outfit['name'])}</h1><div class="detail-tags">{tags}</div>{guidance}<div class="outfit-description"><h2>{esc(hook)}</h2><p>{esc(rest)}</p></div><div class="detail-action"><p>喜歡這一套？歡迎私訊詢問。</p><a class="primary-button inquiry-button" href="{SHOP['instagram']}" target="_blank" rel="noopener noreferrer" aria-label="私訊問價，前往阿蓁 Instagram（另開分頁）">{IG}私訊問價{ARROW}</a><p class="inquiry-note">前往 Instagram @azhen_2026<br>傳送穿搭照片或名稱，就能和阿蓁聊聊。</p></div><p class="detail-disclosure">{SHOP['disclosure']}</p></div></section><section class="related-section" aria-labelledby="related-title"><div class="related-heading"><h2 id="related-title">再看看其他穿搭</h2><a class="text-link" data-back-link href="../../#collection">全部穿搭{ARROW}</a></div><div class="outfit-grid related-grid">{''.join(card(o, prefix) for o in following)}</div></section></div></main>''' + footer(prefix)
+    body = header(prefix) + f'''<main id="main"><div class="wrap"><div class="detail-navigation"><a class="back-link" data-back-link href="../../#collection">← 回到穿搭型錄</a><a class="back-link" href="#inquiry">私訊問這套 ↓</a></div><section class="detail-layout" aria-labelledby="outfit-title"><div class="detail-photo">{image(outfit, prefix, '(max-width: 700px) 100vw, 55vw', eager=True)}</div><div class="detail-copy"><p class="eyebrow">阿蓁の穿搭提案 <span class="outfit-no">{n:02d} / 27</span></p><h1 id="outfit-title">{esc(outfit['name'])}</h1><div class="detail-tags">{tags}</div>{guidance}<div class="outfit-description"><h2>{esc(hook)}</h2><p>{esc(rest)}</p></div>{inquiry(outfit)}<p class="detail-disclosure">{SHOP['disclosure']}</p></div></section><section class="related-section" aria-labelledby="related-title"><div class="related-heading"><h2 id="related-title">再看看其他穿搭</h2><a class="text-link" data-back-link href="../../#collection">全部穿搭{ARROW}</a></div><div class="outfit-grid related-grid">{''.join(card(o, prefix) for o in following)}</div></section></div></main>''' + footer(prefix)
     dest = OUT / f'outfits/{n:02d}'
     dest.mkdir(parents=True, exist_ok=True)
     (dest / 'index.html').write_text(shell(outfit['name'] + '｜阿蓁の衣舖子', outfit['copy'], body, prefix, f'outfits/{n:02d}/', True, f'assets/share-{n:02d}.jpg'))

@@ -1,5 +1,6 @@
 """Check catalog completeness and every generated internal link without dependencies."""
 import json
+import html
 from html.parser import HTMLParser
 from pathlib import Path
 import unittest
@@ -57,13 +58,30 @@ class LookbookTests(unittest.TestCase):
             doc = Document(text)
             ctas = [a for tag, a in doc.tags if tag == 'a' and 'inquiry-button' in a.get('class', '')]
             self.assertEqual(len(ctas), 1)
-            self.assertEqual(ctas[0]['href'], 'https://www.instagram.com/azhen_2026/')
+            self.assertEqual(ctas[0]['href'], 'https://ig.me/m/azhen_2026')
+            self.assertNotIn('target', ctas[0])
             self.assertIn('私訊問價', text)
             hook, _, rest = o['copy'].partition('。')
             self.assertIn(hook + '。', text)
             self.assertIn(rest, text)
             self.assertTrue((DOCS / f'assets/outfit-{o["id"]:02d}-large.webp').exists())
             self.assertTrue((DOCS / f'assets/outfit-{o["id"]:02d}-small.webp').exists())
+
+    def test_every_inquiry_keeps_outfit_context_without_javascript(self):
+        for outfit in DATA:
+            text = (DOCS / f'outfits/{outfit["id"]:02d}/index.html').read_text()
+            tags = Document(text).tags
+            fields = [a for tag, a in tags if tag == 'textarea' and a.get('id') == 'inquiry-message']
+            self.assertEqual(len(fields), 1)
+            self.assertIn('readonly', fields[0])
+            self.assertIn(html.escape(f'阿蓁您好，我想詢問第 {outfit["id"]:02d} 套：{outfit["name"]}'), text)
+            self.assertIn(f'https://ylu1983.github.io/azhen-lookbook/outfits/{outfit["id"]:02d}/</textarea>', text)
+            self.assertTrue(any(tag == 'a' and a.get('href') == 'https://www.instagram.com/azhen_2026/' for tag, a in tags))
+            self.assertTrue(any(tag == 'a' and a.get('href') == '#inquiry' for tag, a in tags))
+            buttons = [a for tag, a in tags if tag == 'button' and a.get('class') == 'copy-inquiry']
+            self.assertEqual(len(buttons), 1)
+            self.assertIn('hidden', buttons[0])
+            self.assertIn('資訊不會自動傳送', text)
 
     def test_all_internal_pages_and_assets_exist(self):
         for page in DOCS.rglob('*.html'):
