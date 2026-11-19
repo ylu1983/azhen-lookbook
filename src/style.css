@@ -29,3 +29,5 @@ body{overflow-wrap:anywhere}
 @media(max-width:700px){.site-header{min-height:80px}.site-header nav .nav-link{display:none}.brand{flex-shrink:0}.related-heading,.results-line{flex-wrap:wrap}}
 /* em breakpoints also respond to the browser's preferred font size. */
 @media(max-width:20em){.outfit-grid{grid-template-columns:minmax(0,1fr)}.hero-copy,.detail-copy{min-width:0}}
+/* Let photo labels set the hero height when larger text wraps. */
+@media(max-width:700px){.hero-visual{flex-wrap:wrap;padding-bottom:10px}.hero-caption{position:static;flex-basis:100%;margin-top:12px}}
