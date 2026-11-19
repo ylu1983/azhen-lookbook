@@ -8,20 +8,44 @@
   const state = { occasion: '', concern: '' };
   const filterBar = document.querySelector('.filter-bar');
 
+  function updateScrollEdge(options) {
+    const selected = options.querySelector('.is-active');
+    const previous = selected?.previousElementSibling;
+    let fragment = false;
+    if (previous && !previous.matches(':focus-visible')) {
+      const bounds = options.getBoundingClientRect();
+      const chip = selected.getBoundingClientRect();
+      const before = previous.getBoundingClientRect();
+      const style = getComputedStyle(previous);
+      const textEnd = before.right - parseFloat(style.paddingRight) - parseFloat(style.borderRightWidth);
+      // Cover only a tiny cut-off text tail, never a readable option or the selected chip.
+      fragment = before.left < bounds.left && textEnd > bounds.left
+        && textEnd <= bounds.left + 14 && chip.left >= bounds.left + 14;
+    }
+    options.classList.toggle('has-leading-fragment', fragment);
+  }
+
+  function revealChip(options, selected) {
+    const bounds = options.getBoundingClientRect();
+    const chip = selected.getBoundingClientRect();
+    const inset = 8;
+    if (chip.left < bounds.left + inset) {
+      options.scrollLeft += chip.left - bounds.left - inset;
+    } else if (chip.right > bounds.right - inset) {
+      options.scrollLeft += chip.right - bounds.right + inset;
+    }
+    updateScrollEdge(options);
+  }
+
   function revealSelections() {
     for (const options of document.querySelectorAll('.filter-options')) {
       const overflow = options.scrollWidth > options.clientWidth + 1;
       options.closest('.filter-row').classList.toggle('is-scrollable', overflow);
-      if (!overflow) continue;
-      const selected = options.querySelector('.is-active');
-      const bounds = options.getBoundingClientRect();
-      const chip = selected.getBoundingClientRect();
-      const inset = 8;
-      if (chip.left < bounds.left + inset) {
-        options.scrollLeft += chip.left - bounds.left - inset;
-      } else if (chip.right > bounds.right - inset) {
-        options.scrollLeft += chip.right - bounds.right + inset;
+      if (!overflow) {
+        options.classList.remove('has-leading-fragment');
+        continue;
       }
+      revealChip(options, options.querySelector('.is-active'));
     }
   }
 
@@ -146,6 +170,17 @@
     }
     window.addEventListener('popstate', () => { readLocation(); render(); });
     window.addEventListener('pageshow', syncFilterLayout);
+    for (const options of document.querySelectorAll('.filter-options')) {
+      options.addEventListener('scroll', () => updateScrollEdge(options), { passive: true });
+      options.addEventListener('focusin', event => {
+        if (!event.target.matches('.filter-chip:focus-visible')) return;
+        revealChip(options, event.target);
+        // Native keyboard focus scrolling can settle after focusin.
+        requestAnimationFrame(() => {
+          if (event.target === document.activeElement) revealChip(options, event.target);
+        });
+      });
+    }
     new ResizeObserver(syncFilterLayout).observe(filterBar);
   } else {
     const query = new URLSearchParams();
@@ -156,6 +191,8 @@
     for (const link of document.querySelectorAll('[data-back-link], .related-grid .outfit-link')) {
       const url = new URL(link.href);
       url.search = query.toString();
+      // Return to the results, not the tall collection introduction at large text sizes.
+      if (link.matches('[data-back-link]')) url.hash = 'outfit-grid';
       link.href = url.href;
     }
   }
