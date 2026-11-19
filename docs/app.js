@@ -6,6 +6,38 @@
   const filterKeys = ['occasion', 'concern'];
   const chips = [...document.querySelectorAll('[data-filter]')];
   const state = { occasion: '', concern: '' };
+
+  // Browser focus scrolling does not consistently account for a fixed action.
+  const inquiry = document.querySelector('.detail-navigation a[href="#inquiry"]');
+  if (inquiry) inquiry.setAttribute('aria-label', '前往這套的詢問內容，先複製穿搭資訊');
+  // Once reached, let the copy controls and real Instagram action own the screen.
+  const inquirySection = document.querySelector('#inquiry');
+  if (inquiry && inquirySection) new IntersectionObserver(([entry]) => {
+    document.body.classList.toggle('inquiry-in-view', entry.isIntersecting);
+    if (!entry.isIntersecting) requestAnimationFrame(() => {
+      const target = document.activeElement;
+      if (target instanceof HTMLElement && target !== document.body && target !== inquiry) {
+        const bounds = target.getBoundingClientRect();
+        if (bounds.top < innerHeight && bounds.bottom > 0) revealAboveInquiry(target);
+      }
+    });
+  }).observe(inquirySection);
+  function revealAboveInquiry(target) {
+    if (!inquiry || getComputedStyle(inquiry).position !== 'fixed'
+      || getComputedStyle(inquiry).visibility === 'hidden') return;
+    const visibleBottom = inquiry.getBoundingClientRect().top - 16;
+    const bottom = target.getBoundingClientRect().bottom;
+    if (bottom > visibleBottom) window.scrollBy({ top: bottom - visibleBottom, behavior: 'instant' });
+  }
+  if (inquiry) document.addEventListener('focusin', event => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement) || inquiry.contains(target)
+      || getComputedStyle(inquiry).position !== 'fixed') return;
+    requestAnimationFrame(() => {
+      if (document.activeElement !== target) return;
+      revealAboveInquiry(target);
+    });
+  });
   const filterBar = document.querySelector('.filter-bar');
 
   function updateScrollEdge(options) {
