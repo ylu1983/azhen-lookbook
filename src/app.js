@@ -6,6 +6,20 @@
   const filterKeys = ['occasion', 'concern'];
   const chips = [...document.querySelectorAll('[data-filter]')];
   const state = { occasion: '', concern: '' };
+
+  // Browser focus scrolling does not consistently account for a fixed action.
+  const inquiry = document.querySelector('.inquiry-button');
+  if (inquiry) document.addEventListener('focusin', event => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement) || inquiry.contains(target)
+      || getComputedStyle(inquiry).position !== 'fixed') return;
+    requestAnimationFrame(() => {
+      if (document.activeElement !== target) return;
+      const visibleBottom = inquiry.getBoundingClientRect().top - 16;
+      const bottom = target.getBoundingClientRect().bottom;
+      if (bottom > visibleBottom) window.scrollBy({ top: bottom - visibleBottom, behavior: 'instant' });
+    });
+  });
   const filterBar = document.querySelector('.filter-bar');
 
   function updateScrollEdge(options) {
