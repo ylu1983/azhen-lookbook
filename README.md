@@ -36,4 +36,6 @@ In repository **Settings → Pages**, use **Deploy from a branch**, branch **mai
 
 ## Checks
 
+Social previews use committed 1200×630 JPEGs so crawlers do not need WebP support. PNG/ICO and Apple touch icons supplement the SVG favicon. To regenerate media after changing photos or branding, install Pillow and run `python3 scripts/prepare_share_assets.py --font /path/to/TraditionalChineseFont.otf`, then rebuild normally. Pillow and the font are not needed for normal site builds.
+
 The tests validate all 27 entries, exact concern tags and representative intersection counts, supplied copy, inquiry destinations, internal links, and mobile image budgets. The `Validate site` workflow rebuilds with Python, runs these tests, and rejects stale generated output.
