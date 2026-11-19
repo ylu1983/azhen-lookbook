@@ -110,6 +110,29 @@ class LookbookTests(unittest.TestCase):
         self.assertEqual([img['loading'] for img in grid], ['eager'] * 2 + ['lazy'] * 25)
         self.assertIn('(max-width: 700px) calc((100vw - 50px) / 2)', grid[0]['sizes'])
 
+    def test_static_social_previews_and_icon_fallbacks(self):
+        pages = [(DOCS / 'index.html', '', 7)] + [
+            (DOCS / f'outfits/{o["id"]:02d}/index.html', f'outfits/{o["id"]:02d}/', o['id'])
+            for o in DATA
+        ]
+        for page, path, number in pages:
+            with self.subTest(page=page):
+                tags = Document(page.read_text()).tags
+                meta = {a.get('property'): a.get('content') for tag, a in tags if tag == 'meta'}
+                self.assertTrue(meta['og:title'])
+                self.assertTrue(meta['og:description'])
+                self.assertEqual(meta['og:url'], f'https://ylu1983.github.io/azhen-lookbook/{path}')
+                self.assertEqual(meta['og:image'], f'https://ylu1983.github.io/azhen-lookbook/assets/share-{number:02d}.jpg')
+                self.assertEqual(meta['og:image:type'], 'image/jpeg')
+                self.assertEqual((meta['og:image:width'], meta['og:image:height']), ('1200', '630'))
+                self.assertTrue(meta['og:image:alt'])
+                photo = DOCS / f'assets/share-{number:02d}.jpg'
+                self.assertTrue(photo.read_bytes().startswith(b'\xff\xd8\xff'))
+                self.assertLess(photo.stat().st_size, 250_000)
+                icons = [a['href'] for tag, a in tags if tag == 'link' and a.get('rel') in {'icon', 'apple-touch-icon'}]
+                for filename in ('favicon.ico', 'favicon-32.png', 'favicon.svg', 'apple-touch-icon.png'):
+                    self.assertTrue(any(url.endswith('/' + filename) for url in icons))
+
 
 if __name__ == '__main__':
     unittest.main()
