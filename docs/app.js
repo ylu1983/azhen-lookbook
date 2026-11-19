@@ -10,17 +10,26 @@
   // Browser focus scrolling does not consistently account for a fixed action.
   const inquiry = document.querySelector('.detail-navigation a[href="#inquiry"]');
   if (inquiry) inquiry.setAttribute('aria-label', '前往這套的詢問內容，先複製穿搭資訊');
+  function revealAboveInquiry(target) {
+    if (!inquiry || getComputedStyle(inquiry).position !== 'fixed') return;
+    const visibleBottom = inquiry.getBoundingClientRect().top - 16;
+    const bottom = target.getBoundingClientRect().bottom;
+    if (bottom > visibleBottom) window.scrollBy({ top: bottom - visibleBottom, behavior: 'instant' });
+  }
   if (inquiry) document.addEventListener('focusin', event => {
     const target = event.target;
     if (!(target instanceof HTMLElement) || inquiry.contains(target)
       || getComputedStyle(inquiry).position !== 'fixed') return;
     requestAnimationFrame(() => {
       if (document.activeElement !== target) return;
-      const visibleBottom = inquiry.getBoundingClientRect().top - 16;
-      const bottom = target.getBoundingClientRect().bottom;
-      if (bottom > visibleBottom) window.scrollBy({ top: bottom - visibleBottom, behavior: 'instant' });
+      revealAboveInquiry(target);
     });
   });
+  // Copy feedback arrives asynchronously, after the button's focus scrolling.
+  const inquiryStatus = document.querySelector('#copy-status');
+  if (inquiry && inquiryStatus) new MutationObserver(() => {
+    requestAnimationFrame(() => revealAboveInquiry(inquiryStatus));
+  }).observe(inquiryStatus, { childList: true, characterData: true, subtree: true });
   const filterBar = document.querySelector('.filter-bar');
 
   function updateScrollEdge(options) {
