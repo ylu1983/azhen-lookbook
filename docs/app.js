@@ -12,7 +12,7 @@
     const selected = options.querySelector('.is-active');
     const previous = selected?.previousElementSibling;
     let fragment = false;
-    if (previous) {
+    if (previous && !previous.matches(':focus-visible')) {
       const bounds = options.getBoundingClientRect();
       const chip = selected.getBoundingClientRect();
       const before = previous.getBoundingClientRect();
@@ -25,6 +25,18 @@
     options.classList.toggle('has-leading-fragment', fragment);
   }
 
+  function revealChip(options, selected) {
+    const bounds = options.getBoundingClientRect();
+    const chip = selected.getBoundingClientRect();
+    const inset = 8;
+    if (chip.left < bounds.left + inset) {
+      options.scrollLeft += chip.left - bounds.left - inset;
+    } else if (chip.right > bounds.right - inset) {
+      options.scrollLeft += chip.right - bounds.right + inset;
+    }
+    updateScrollEdge(options);
+  }
+
   function revealSelections() {
     for (const options of document.querySelectorAll('.filter-options')) {
       const overflow = options.scrollWidth > options.clientWidth + 1;
@@ -33,16 +45,7 @@
         options.classList.remove('has-leading-fragment');
         continue;
       }
-      const selected = options.querySelector('.is-active');
-      const bounds = options.getBoundingClientRect();
-      const chip = selected.getBoundingClientRect();
-      const inset = 8;
-      if (chip.left < bounds.left + inset) {
-        options.scrollLeft += chip.left - bounds.left - inset;
-      } else if (chip.right > bounds.right - inset) {
-        options.scrollLeft += chip.right - bounds.right + inset;
-      }
-      updateScrollEdge(options);
+      revealChip(options, options.querySelector('.is-active'));
     }
   }
 
@@ -169,6 +172,14 @@
     window.addEventListener('pageshow', syncFilterLayout);
     for (const options of document.querySelectorAll('.filter-options')) {
       options.addEventListener('scroll', () => updateScrollEdge(options), { passive: true });
+      options.addEventListener('focusin', event => {
+        if (!event.target.matches('.filter-chip:focus-visible')) return;
+        revealChip(options, event.target);
+        // Native keyboard focus scrolling can settle after focusin.
+        requestAnimationFrame(() => {
+          if (event.target === document.activeElement) revealChip(options, event.target);
+        });
+      });
     }
     new ResizeObserver(syncFilterLayout).observe(filterBar);
   } else {
