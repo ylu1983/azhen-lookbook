@@ -14,6 +14,13 @@
   const inquirySection = document.querySelector('#inquiry');
   if (inquiry && inquirySection) new IntersectionObserver(([entry]) => {
     document.body.classList.toggle('inquiry-in-view', entry.isIntersecting);
+    if (!entry.isIntersecting) requestAnimationFrame(() => {
+      const target = document.activeElement;
+      if (target instanceof HTMLElement && target !== document.body && target !== inquiry) {
+        const bounds = target.getBoundingClientRect();
+        if (bounds.top < innerHeight && bounds.bottom > 0) revealAboveInquiry(target);
+      }
+    });
   }).observe(inquirySection);
   function revealAboveInquiry(target) {
     if (!inquiry || getComputedStyle(inquiry).position !== 'fixed'
