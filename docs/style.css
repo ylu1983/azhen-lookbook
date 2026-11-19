@@ -37,6 +37,7 @@ body{overflow-wrap:anywhere}
 /* Let photo labels set the hero height when larger text wraps. */
 @media(max-width:700px){.hero-visual{flex-wrap:wrap;padding-bottom:10px}.hero-caption{position:static;flex-basis:100%;margin-top:12px}}
 /* Keep the copy-first inquiry section in reach; never bypass it for Instagram. */
+.inquiry-label,.copy-inquiry,.copy-status{font-size:1rem}
 @media(max-width:700px){
   html{scroll-padding-bottom:calc(5rem + env(safe-area-inset-bottom,0px))}
   .detail-page{padding-bottom:calc(5rem + env(safe-area-inset-bottom,0px))}

@@ -9,6 +9,7 @@
 
   // Browser focus scrolling does not consistently account for a fixed action.
   const inquiry = document.querySelector('.detail-navigation a[href="#inquiry"]');
+  if (inquiry) inquiry.setAttribute('aria-label', '前往這套的詢問內容，先複製穿搭資訊');
   if (inquiry) document.addEventListener('focusin', event => {
     const target = event.target;
     if (!(target instanceof HTMLElement) || inquiry.contains(target)
