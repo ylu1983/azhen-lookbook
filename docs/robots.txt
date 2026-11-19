@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://ylu1983.github.io/azhen-lookbook/sitemap.xml
