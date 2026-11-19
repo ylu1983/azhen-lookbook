@@ -10,8 +10,14 @@
   // Browser focus scrolling does not consistently account for a fixed action.
   const inquiry = document.querySelector('.detail-navigation a[href="#inquiry"]');
   if (inquiry) inquiry.setAttribute('aria-label', '前往這套的詢問內容，先複製穿搭資訊');
+  // Once reached, let the copy controls and real Instagram action own the screen.
+  const inquirySection = document.querySelector('#inquiry');
+  if (inquiry && inquirySection) new IntersectionObserver(([entry]) => {
+    document.body.classList.toggle('inquiry-in-view', entry.isIntersecting);
+  }).observe(inquirySection);
   function revealAboveInquiry(target) {
-    if (!inquiry || getComputedStyle(inquiry).position !== 'fixed') return;
+    if (!inquiry || getComputedStyle(inquiry).position !== 'fixed'
+      || getComputedStyle(inquiry).visibility === 'hidden') return;
     const visibleBottom = inquiry.getBoundingClientRect().top - 16;
     const bottom = target.getBoundingClientRect().bottom;
     if (bottom > visibleBottom) window.scrollBy({ top: bottom - visibleBottom, behavior: 'instant' });
@@ -25,11 +31,6 @@
       revealAboveInquiry(target);
     });
   });
-  // Copy feedback arrives asynchronously, after the button's focus scrolling.
-  const inquiryStatus = document.querySelector('#copy-status');
-  if (inquiry && inquiryStatus) new MutationObserver(() => {
-    requestAnimationFrame(() => revealAboveInquiry(inquiryStatus));
-  }).observe(inquiryStatus, { childList: true, characterData: true, subtree: true });
   const filterBar = document.querySelector('.filter-bar');
 
   function updateScrollEdge(options) {

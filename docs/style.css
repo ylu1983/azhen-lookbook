@@ -42,4 +42,5 @@ body{overflow-wrap:anywhere}
   html{scroll-padding-bottom:calc(5rem + env(safe-area-inset-bottom,0px))}
   .detail-page{padding-bottom:calc(5rem + env(safe-area-inset-bottom,0px))}
   .detail-page .detail-navigation a[href="#inquiry"]{position:fixed;z-index:30;inset-inline:14px;bottom:calc(12px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;justify-content:center;min-height:58px;padding:13px 25px;margin:0;background:var(--primary-action);color:var(--primary-action-fg);border:1px solid var(--primary-action);border-radius:var(--radius);font-size:1.0625rem;text-align:center;box-shadow:0 0 0 10px var(--bg),0 -4px 20px #282a251a}
+  .detail-page.inquiry-in-view .detail-navigation a[href="#inquiry"]{visibility:hidden}
 }
