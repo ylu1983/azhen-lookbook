@@ -32,15 +32,16 @@
 
   function changeFilters(update) {
     const results = document.querySelector('.collection-results');
-    // Capture before hiding cards: scroll anchoring may otherwise move the page.
-    const shouldReveal = filterBar.getBoundingClientRect().top <= 0
-      || results.getBoundingClientRect().top > window.innerHeight - 120;
     update();
     render(true);
-    if (shouldReveal || !document.querySelector('#empty-state').hidden) {
-      const top = window.scrollY + results.getBoundingClientRect().top - filterBar.offsetHeight;
+    const revealResults = () => {
+      const top = window.scrollY + results.getBoundingClientRect().top - filterBar.offsetHeight - 16;
       window.scrollTo({ top, behavior: 'instant' });
-    }
+    };
+    revealResults();
+    // Button focus and scroll anchoring can run after the click handler.
+    // Re-align once they settle so guidance cannot remain behind the sticky bar.
+    requestAnimationFrame(revealResults);
   }
   const cards = grid ? [...grid.children] : [];
 
