@@ -32,14 +32,42 @@
 
   function changeFilters(update) {
     const results = document.querySelector('.collection-results');
-    // Capture before hiding cards: scroll anchoring may otherwise move the page.
-    const shouldReveal = filterBar.getBoundingClientRect().top <= 0
-      || results.getBoundingClientRect().top > window.innerHeight - 120;
     update();
     render(true);
-    if (shouldReveal || !document.querySelector('#empty-state').hidden) {
-      const top = window.scrollY + results.getBoundingClientRect().top - filterBar.offsetHeight;
+    const revealResults = () => {
+      const top = window.scrollY + results.getBoundingClientRect().top - filterBar.offsetHeight - 16;
       window.scrollTo({ top, behavior: 'instant' });
+    };
+    revealResults();
+    // Button focus and scroll anchoring can run after the click handler.
+    // Re-align once they settle so guidance cannot remain behind the sticky bar.
+    requestAnimationFrame(revealResults);
+  }
+  const cards = grid ? [...grid.children] : [];
+
+  function matches(card, occasion, concern) {
+    return (!occasion || card.dataset.occasions.split('|').includes(occasion))
+      && (!concern || card.dataset.concerns.split('|').includes(concern));
+  }
+
+  function renderRecovery() {
+    const container = document.querySelector('#empty-alternatives');
+    container.replaceChildren();
+    for (const key of filterKeys) {
+      if (!state[key] || !state[filterKeys.find(other => other !== key)]) continue;
+      const count = cards.filter(card => matches(card,
+        key === 'occasion' ? state.occasion : '',
+        key === 'concern' ? state.concern : '')).length;
+      if (!count) continue;
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'recovery-button';
+      button.textContent = `保留「${state[key]}」，看 ${count} 套`;
+      button.addEventListener('click', () => {
+        changeFilters(() => { state[filterKeys.find(other => other !== key)] = ''; });
+        document.querySelector('#result-count').focus({ preventScroll: true });
+      });
+      container.append(button);
     }
   }
 
@@ -56,11 +84,10 @@
     const query = new URLSearchParams();
     for (const key of filterKeys) if (state[key]) query.set(key, state[key]);
     let count = 0;
-    for (const card of grid.children) {
-      const matches = (!state.occasion || card.dataset.occasions.split('|').includes(state.occasion))
-        && (!state.concern || card.dataset.concerns.split('|').includes(state.concern));
-      card.hidden = !matches;
-      if (matches) count++;
+    for (const card of cards) {
+      const visible = matches(card, state.occasion, state.concern);
+      card.hidden = !visible;
+      if (visible) count++;
       const link = card.querySelector('a');
       const url = new URL(link.href);
       url.search = query.toString();
@@ -75,6 +102,8 @@
     document.querySelector('#clear-filters').hidden = !active;
     document.querySelector('#empty-state').hidden = count > 0;
     document.querySelector('#collection-end').hidden = count === 0;
+    document.querySelector('#arm-guidance').hidden = state.concern !== '手臂粗不敢穿無袖';
+    if (!count) renderRecovery();
     if (updateUrl) {
       const url = new URL(location.href);
       url.search = query.toString();
