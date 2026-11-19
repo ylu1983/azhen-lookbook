@@ -36,3 +36,9 @@ body{overflow-wrap:anywhere}
 @media(max-width:20em){.outfit-grid{grid-template-columns:minmax(0,1fr)}.hero-copy,.detail-copy{min-width:0}}
 /* Let photo labels set the hero height when larger text wraps. */
 @media(max-width:700px){.hero-visual{flex-wrap:wrap;padding-bottom:10px}.hero-caption{position:static;flex-basis:100%;margin-top:12px}}
+/* Keep the existing inquiry link in reach without duplicating its destination. */
+@media(max-width:700px){
+  html{scroll-padding-bottom:calc(5rem + env(safe-area-inset-bottom,0px))}
+  .detail-page{padding-bottom:calc(5rem + env(safe-area-inset-bottom,0px))}
+  .detail-page .inquiry-button{position:fixed;z-index:30;inset-inline:14px;bottom:calc(12px + env(safe-area-inset-bottom,0px));width:auto;margin:0;box-shadow:0 0 0 10px var(--bg),0 -4px 20px #282a251a}
+}
