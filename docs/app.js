@@ -8,7 +8,7 @@
   const state = { occasion: '', concern: '' };
 
   // Browser focus scrolling does not consistently account for a fixed action.
-  const inquiry = document.querySelector('.inquiry-button');
+  const inquiry = document.querySelector('.detail-navigation a[href="#inquiry"]');
   if (inquiry) document.addEventListener('focusin', event => {
     const target = event.target;
     if (!(target instanceof HTMLElement) || inquiry.contains(target)
